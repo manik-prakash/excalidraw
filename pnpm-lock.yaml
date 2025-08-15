@@ -103,6 +103,24 @@ importers:
         specifier: ^8.18.3
         version: 8.18.3
 
+  packages/backend-common:
+    dependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.15.3
+        version: 22.15.3
+
+  packages/common:
+    dependencies:
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      zod:
+        specifier: ^4.0.17
+        version: 4.0.17
+
   packages/eslint-config:
     devDependencies:
       '@eslint/js':
