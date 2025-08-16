@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -47,22 +48,30 @@ app.post("/signup", async (req, res) => {
 
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(password, salt);
+    
+    try {
+        const result = await prisma.user.create({
+            data: {
+                username: username,
+                email: email,
+                passwordHash: hash
+            }
+        })
 
-    const result = await prisma.user.create({
-        data: {
-            username: username,
-            email: email,
-            passwordHash: hash
-        }
-    })
+        const payload = jwt.sign({ userID: result.id, email: result.email }, secret, { expiresIn: "4h" });
 
-    // const payload = jwt.sign({ userID: result.userId, email: result.email }, secret, { expiresIn: "1h" });
-    console.log(result);
+        res.status(200).json({
+            message: "User created successfully",
+            token: payload,
+        });
 
-    res.status(200).json({
-        message: "User created successfully",
-        token: "csbvcsubsucbu",
-    });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            message : error
+        });
+    }
+
 })
 
 app.post("/room", (req, res) => {
@@ -70,4 +79,6 @@ app.post("/room", (req, res) => {
 })
 
 
-app.listen(5000);
+app.listen(5000, () => {
+    console.log("running on port : 5000");
+});
