@@ -1,8 +1,26 @@
 import { WebSocketServer } from "ws";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { decode, JwtPayload } from "jsonwebtoken";
+import { JWT_SECRET_WORD } from "@repo/backend-common/config";
 
-const secret = process.env.JWT_SECRET || "super_secret_token";
+const secret = JWT_SECRET_WORD;
+if (!secret) {
+  throw new Error("JWT_SECRET must be defined in environment variables");
+}
 const wss = new WebSocketServer({ port: 8080 });
+
+function checkUser(token: string): string | null {
+
+  const decoded = jwt.verify(token, secret);
+  if (typeof decoded == "string") {
+    return null;
+  }
+
+  if (!decoded || !decoded.userID) {
+    return null;
+  }
+
+  return decoded.userID;
+}
 
 wss.on('connection', function connection(ws, request) {
 
@@ -14,15 +32,16 @@ wss.on('connection', function connection(ws, request) {
   const queryParams = new URLSearchParams(url.split('?')[1]);
   const token = queryParams.get('token') ?? "";
 
-  const decoded = jwt.verify(token,secret);
-  if( !decoded ||!(decoded as JwtPayload).userID){
+  const authenticatedUserId = checkUser(token);
+  if (!authenticatedUserId) {
     ws.close();
-    return;
   }
+
+  
+
 
   ws.on('message', function message(data) {
     console.log('received: %s', data);
   });
 
-  ws.send('working');
 });
