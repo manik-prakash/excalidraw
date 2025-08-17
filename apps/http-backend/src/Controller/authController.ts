@@ -3,8 +3,9 @@ import prisma from "@repo/db/client";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { signinSchema, signupSchema } from "@repo/common/types";
+import { JWT_SECRET_WORD } from "@repo/backend-common/config";
 
-const secret = process.env.JWT_SECRET;
+const secret = JWT_SECRET_WORD;
 if (!secret) {
     throw new Error("JWT_SECRET must be defined in environment variables");
 }

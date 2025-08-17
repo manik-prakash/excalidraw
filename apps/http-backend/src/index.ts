@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from "express";
 import authRoute from "./Routes/authRoute"
 import { errorHandler } from './Middleware/errorHandler';
+import {verify} from './Middleware/auth';
 const app = express();
 
 app.use(express.urlencoded({ extended: true }));
@@ -13,7 +14,7 @@ app.get("/ping", (req, res) => {
 
 app.use("/auth",authRoute);
 
-app.post("/room", (req, res) => {
+app.post("/room",verify, (req, res) => {
 
 })
 

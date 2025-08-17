@@ -1,28 +1,32 @@
-import { NextFunction, Request,Response } from "express";
-import  jwt, { decode }  from "jsonwebtoken";
-const secret = process.env.JWT_SECRET || "super_secret_token";
+import { NextFunction, Request, Response } from "express";
+import jwt from "jsonwebtoken";
+import { JWT_SECRET_WORD } from "@repo/backend-common/config";
 
-interface authRequest extends Request {
-    userID : String
+const secret = JWT_SECRET_WORD;
+if (!secret) {
+    throw new Error("JWT_SECRET must be defined in environment variables");
+}
+
+interface AuthRequest extends Request {
+  userID?: string; 
 }
 
 interface JwtPayload {
-  userID: string
+  userID: string;
 }
 
-export function verify (req : authRequest , res : Response , next : NextFunction){
+export const verify = (req: AuthRequest, res: Response, next: NextFunction) => {
+  const token = req.headers["authorization"]?.split(" ")[1]; 
 
-    const token = req.headers['authorization'] ?? "";
+  if (!token) {
+    return res.status(401).json({ message: "No token provided" });
+  }
 
-    const decoded = jwt.verify(token , secret) as JwtPayload;
-
-    if(decoded){
-        req.userID = decoded.userID;
-        next();
-    } else{
-        res.status(404).json({
-            message : "No access"
-        })
-    }
-
-}
+  try {
+    const decoded = jwt.verify(token, secret) as JwtPayload;
+    req.userID = decoded.userID;
+    next();
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid token" });
+  }
+};

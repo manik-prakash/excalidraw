@@ -1,1 +1,1 @@
-export const JWT_SECRET = process.env.JWT_SECRET || "super_secret_token";
+export const JWT_SECRET_WORD = process.env.JWT_SECRET || "super_secret_token";
